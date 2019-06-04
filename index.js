@@ -43,7 +43,6 @@ app.get(`/api`, (req, res) => {
         })
         return
     }
-    console.time('searchTime')
     let sizeArr = longArray.length
     let controlTop = req.query.top ? parseInt(req.query.top) : Infinity
     let censitive = req.query.cs ? req.query.cs : false
@@ -57,24 +56,24 @@ app.get(`/api`, (req, res) => {
     
     // Todos los que inicien y finalicen con "*"
     if (/^\*.*\*$/.test(builRegex)) {
-        console.log('Ejemplo: *oa*, todos los que tienen "oa" en cualquier posicion')
+        // 'Ejemplo: *oa*, todos los que tienen "oa" en cualquier posicion'
         builRegex = builRegex.replace(/\*/g, '.*')
     // Todos los que contengan "*" pero no en los extremos
     } else if (/^[^\*].*[^\*]$/.test(builRegex)) {
-        console.log('Ejemplo: o*a, todos los que inician con "o" y finalizan con "a"')
+        // 'Ejemplo: o*a, todos los que inician con "o" y finalizan con "a"'
         builRegex = `^${builRegex.replace(/\*/g, '.*')}$`
     // Todos los que solo inicien con  "*"
     } else if (/^\*.*/.test(builRegex)) {
-        console.log('Ejemplo: *a, todos los que finalizan con a')
+        // 'Ejemplo: *a, todos los que finalizan con a'
         builRegex = `${builRegex.replace(/\*/g, '.*')}$`
     // Todos los que solo finalicen con  "*"
     } else if (/.*\*$/.test(builRegex)) {
-        console.log('Ejemplo: a*, todos los que inicien con a')
+        // 'Ejemplo: a*, todos los que inicien con a'
         builRegex = `^${builRegex.replace(/\*/g, '.*')}`
     }
     // texto censible
     builRegex = censitive ? new RegExp(builRegex) : new RegExp(builRegex, 'i')
-    console.log(builRegex)
+    // console.log(builRegex)
 
     // recorremos cada fila para buscar el patron construido
     for (let i = 0; i < sizeArr; i++) {
@@ -90,7 +89,6 @@ app.get(`/api`, (req, res) => {
         }
     }
     // Retorna el resultado
-    console.timeEnd('searchTime')
     res.status(200).send({
         success: 'true',
         total: resultArray.length,
