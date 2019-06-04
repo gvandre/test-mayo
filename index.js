@@ -1,9 +1,10 @@
 const express = require('express')
+const iconvlite = require('iconv-lite');
 const fs = require('fs')
 const config = require('./utils/config')
 
 // Variables
-const read = fs.createReadStream('./palabras/palabras.txt', 'utf8')
+const read = fs.createReadStream('./palabras/palabras.txt', 'binary')
 const PORT = config.port;
 let longArray = []
 
@@ -17,8 +18,10 @@ read.on('data', chunk => {
     longString += chunk
 })
 read.on('end', () => {
+    // Codificamos a win1252 para limpiar caracteres extraños
+    let buf = iconvlite.decode(longString, 'win1252')
     // Convertimso el string a Array
-    longArray = longString.split('\r\n')
+    longArray = buf.split('\r\n')
     // Levatamos el servidor
     app.listen(PORT, () => {
         console.log(`server running on port ${PORT}`)
