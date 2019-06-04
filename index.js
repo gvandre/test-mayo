@@ -4,26 +4,31 @@ const fs = require('fs')
 const config = require('./utils/config')
 
 // Variables
-const read = fs.createReadStream('./palabras/palabras.txt', 'binary')
+const read = fs.createReadStream('./palabras/palabras.txt')
 const PORT = config.port;
 let longArray = []
 
 // Levantamos el express app
 const app = express();
 
-let longString = ''
+let longString = []
 // Data por pedasos
+console.time('serverTime')
+console.time('readTime')
 read.on('data', chunk => {
     // construcción del string
-    longString += chunk
+    longString.push(chunk)
 })
 read.on('end', () => {
-    // Codificamos a win1252 para limpiar caracteres extraños
-    let buf = iconvlite.decode(longString, 'win1252')
+    // Codificamos a win1252 para limpiar caracteres extraños, esta metodo es recomendado en la documentación
+    // Referencia: https://github.com/ashtuchkin/iconv-lite/wiki/Use-Buffers-when-decoding
+    console.timeEnd('readTime')
+    let buf = iconvlite.decode(Buffer.concat(longString), 'win1252')
     // Convertimso el string a Array
     longArray = buf.split('\r\n')
     // Levatamos el servidor
     app.listen(PORT, () => {
+        console.timeEnd('serverTime')
         console.log(`server running on port ${PORT}`)
     });
 })
@@ -38,6 +43,7 @@ app.get(`/api`, (req, res) => {
         })
         return
     }
+    console.time('searchTime')
     let sizeArr = longArray.length
     let controlTop = req.query.top ? parseInt(req.query.top) : Infinity
     let censitive = req.query.cs ? req.query.cs : false
@@ -84,6 +90,7 @@ app.get(`/api`, (req, res) => {
         }
     }
     // Retorna el resultado
+    console.timeEnd('searchTime')
     res.status(200).send({
         success: 'true',
         total: resultArray.length,
